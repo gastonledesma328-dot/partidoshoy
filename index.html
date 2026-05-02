@@ -6,65 +6,127 @@
 <title>Partidos Hoy</title>
 
 <style>
+:root {
+  --bg: #020617;
+  --card: #0f172a;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #22c55e;
+}
+
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #0b1120;
-  color: white;
+  background: var(--bg);
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--text);
 }
 
 /* HEADER */
 .header {
-  background: #0f172a;
-  padding: 15px 25px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #1e293b;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #020617;
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: bold;
-  color: #22c55e;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  background: var(--card);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+}
+
+.tab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: black;
 }
 
 /* GRID */
 .container {
   padding: 20px;
   display: grid;
-  gap: 15px;
+  gap: 12px;
 }
 
 /* CARD */
 .card {
-  background: linear-gradient(145deg, #1e293b, #0f172a);
-  border-radius: 12px;
-  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg,#020617,#0f172a);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
   transition: 0.2s;
-  border: 1px solid #1e293b;
-  cursor: pointer;
 }
 
 .card:hover {
-  transform: scale(1.02);
-  border-color: #22c55e;
+  border-color: var(--accent);
+  transform: scale(1.01);
 }
 
-/* TEXT */
-.liga {
+/* LEFT */
+.left {
+  display: flex;
+  flex-direction: column;
+}
+
+.league {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .match {
-  font-size: 16px;
-  margin: 5px 0;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+/* RIGHT */
+.right {
+  text-align: right;
 }
 
 .time {
-  font-size: 13px;
-  color: #22c55e;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.live {
+  font-size: 11px;
+  color: #ef4444;
 }
 </style>
 
@@ -72,10 +134,25 @@ body {
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-  <div class="logo">⚽ Partidos Hoy</div>
+  <div class="logo">⚽ Partidos.Hoy</div>
+
+  <div class="actions">
+    <div class="icon">🔍</div>
+    <div class="icon">📅</div>
+    <div class="icon">👤</div>
+  </div>
 </div>
 
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active">Hoy</div>
+  <div class="tab">Mañana</div>
+  <div class="tab">En Vivo</div>
+</div>
+
+<!-- CONTENIDO -->
 <div class="container" id="app"></div>
 
 <script>
@@ -84,33 +161,41 @@ const partidos = [
     liga: "Premier League",
     equipos: "Arsenal vs Chelsea",
     hora: "16:00",
-    stream: "https://test-stream.m3u8"
+    stream: "https://test.m3u8",
+    live: true
   },
   {
     liga: "La Liga",
-    equipos: "Real Madrid vs Barça",
-    hora: "18:00",
-    stream: "https://test-stream.m3u8"
+    equipos: "Real Madrid vs Barcelona",
+    hora: "18:30",
+    stream: "https://test.m3u8",
+    live: false
   }
 ];
 
 const app = document.getElementById("app");
 
 partidos.forEach(p => {
-  const card = document.createElement("div");
-  card.className = "card";
+  const el = document.createElement("div");
+  el.className = "card";
 
-  card.innerHTML = `
-    <div class="liga">${p.liga}</div>
-    <div class="match">${p.equipos}</div>
-    <div class="time">${p.hora}</div>
+  el.innerHTML = `
+    <div class="left">
+      <div class="league">${p.liga}</div>
+      <div class="match">${p.equipos}</div>
+    </div>
+
+    <div class="right">
+      <div class="time">${p.hora}</div>
+      ${p.live ? '<div class="live">EN VIVO</div>' : ''}
+    </div>
   `;
 
-  card.onclick = () => {
+  el.onclick = () => {
     window.location.href = "player.html?url=" + encodeURIComponent(p.stream);
   };
 
-  app.appendChild(card);
+  app.appendChild(el);
 });
 </script>
 
