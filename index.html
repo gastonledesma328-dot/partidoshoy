@@ -1,256 +1,225 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partidos.Hoy</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Inter,sans-serif;
-  background:#022c22;
-  color:#d1fae5;
-}
+  :root {
+    --bg: #1e3a2f;
+    --bg2: #162d24;
+    --card: #1a3228;
+    --card2: #f5f5f0;
+    --border: rgba(255,255,255,0.1);
+    --primary: #5fcf80;
+    --live: #e8533a;
+    --text: #f0faf4;
+    --muted: rgba(240,250,244,0.55);
+    --chip-bg: #f2f7f3;
+    --chip-fg: #182e22;
+    --rad: 14px;
+    --shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: linear-gradient(160deg, #1e3a2f 0%, #162d24 100%); min-height: 600px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); }
+  .app { max-width: 860px; margin: 0 auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 
-/* CONTAINER */
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:20px;
-}
+  /* HEADER */
+  .header { background: rgba(26,50,40,0.7); border: 1px solid var(--border); border-radius: var(--rad); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(8px); }
+  .logo { font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: -0.5px; color: var(--text); display: flex; align-items: center; gap: 1px; }
+  .logo .ball { display: inline-block; width: 18px; height: 18px; background: var(--primary); border-radius: 50%; margin: 0 1px 0 0; vertical-align: middle; box-shadow: 0 0 0 2px #162d24; }
+  .logo .dot { color: var(--primary); }
+  .header-btns { display: flex; gap: 8px; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.07); border: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.15s; }
+  .icon-btn:hover { background: rgba(255,255,255,0.14); }
+  .icon-btn.primary { background: var(--primary); color: #1a3228; }
 
-/* HEADER */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
+  /* TABS */
+  .tabs { background: rgba(26,50,40,0.7); border: 1px solid var(--border); border-radius: var(--rad); padding: 6px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; backdrop-filter: blur(8px); }
+  .tab { border: none; border-radius: 10px; height: 44px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; background: transparent; color: rgba(240,250,244,0.8); }
+  .tab.active { background: var(--chip-bg); color: var(--chip-fg); box-shadow: var(--shadow); }
+  .tab:hover:not(.active) { background: rgba(255,255,255,0.06); }
+  .live-badge { background: var(--live); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 5px; }
+  .badge { background: var(--live); color: #fff; font-size: 9px; font-weight: 800; height: 18px; min-width: 18px; padding: 0 4px; border-radius: 50px; display: grid; place-items: center; }
 
-.logo{
-  font-size:22px;
-  font-weight:bold;
-}
+  /* FEATURED */
+  .featured { background: linear-gradient(160deg, rgba(30,58,47,0.9) 0%, rgba(18,38,28,0.95) 100%); border: 1px solid var(--border); border-radius: var(--rad); padding: 18px; }
+  .featured-inner { display: grid; grid-template-columns: 1fr 1.4fr 0.9fr; gap: 14px; }
+  .match-info { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .match-label { font-size: 10px; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 14px; }
+  .teams { display: flex; align-items: center; gap: 18px; }
+  .team { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .team-badge { width: 68px; height: 68px; border-radius: 16px; display: grid; place-items: center; font-size: 26px; font-weight: 900; color: #fff; }
+  .badge-a { background: linear-gradient(160deg, #3b82f6, #1e3a8a); }
+  .badge-b { background: linear-gradient(160deg, #ef4444, #7f1d1d); }
+  .team-name { font-size: 12px; font-weight: 700; }
+  .score-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .score { font-size: 36px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+  .vs-text { font-size: 10px; color: var(--muted); margin-top: 4px; }
 
-/* ICONS */
-.actions{
-  display:flex;
-  gap:10px;
-}
+  /* VIDEO */
+  .video-area { background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative; display: flex; align-items: center; justify-content: center; min-height: 160px; }
+  .video-bg { position: absolute; inset: 0; background: radial-gradient(circle at center, #1f1f1f, #000); }
+  .video-live { position: absolute; top: 10px; left: 10px; background: var(--live); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 5px; z-index: 2; }
+  .play-btn { position: relative; z-index: 2; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .play-btn:hover { background: rgba(255,255,255,0.25); }
+  .play-icon { width: 0; height: 0; border-style: solid; border-width: 11px 0 11px 20px; border-color: transparent transparent transparent #fff; margin-left: 4px; }
+  .video-watch { position: absolute; bottom: 10px; left: 10px; background: #fff; color: #1a3228; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; padding: 5px 10px; border-radius: 7px; border: none; cursor: pointer; z-index: 2; }
+  .video-icons { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 8px; color: rgba(255,255,255,0.7); font-size: 16px; z-index: 2; }
 
-.icon{
-  width:40px;
-  height:40px;
-  border-radius:10px;
-  background:#064e3b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+  /* CHAT */
+  .chat-panel { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-label { font-size: 10px; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); }
+  .chat-msgs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .chat-line { display: flex; gap: 8px; align-items: flex-start; }
+  .avatar { width: 22px; height: 22px; border-radius: 50%; background: rgba(95,207,128,0.3); display: grid; place-items: center; font-size: 9px; font-weight: 800; color: var(--primary); flex-shrink: 0; margin-top: 1px; }
+  .chat-text { font-size: 12px; line-height: 1.4; }
+  .chat-text strong { font-weight: 700; margin-right: 4px; }
+  .chat-text span { color: rgba(240,250,244,0.75); }
+  .chat-input { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.07); padding: 8px 12px; border-radius: 10px; }
+  .chat-input input { flex: 1; background: transparent; border: none; outline: none; font-size: 12px; color: var(--text); }
+  .chat-input input::placeholder { color: var(--muted); }
+  .send-btn { background: transparent; border: none; cursor: pointer; color: var(--primary); font-size: 16px; }
 
-/* TABS */
-.tabs{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
+  /* LEAGUE GRID */
+  .leagues { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .league-card { background: var(--chip-bg); color: var(--chip-fg); border-radius: var(--rad); padding: 14px; border: 1px solid rgba(0,0,0,0.05); }
+  .lc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .lc-title { display: flex; align-items: center; gap: 7px; }
+  .lc-icon { font-size: 16px; }
+  .lc-name { font-size: 11px; font-weight: 900; letter-spacing: 0.08em; color: var(--chip-fg); }
+  .lc-live { background: var(--live); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 5px; }
+  .match-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; font-size: 12px; margin-bottom: 8px; }
+  .home-team { display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
+  .away-team { display: flex; align-items: center; gap: 5px; }
+  .team-icon { font-size: 14px; }
+  .match-score { font-size: 10px; font-weight: 800; color: rgba(24,46,34,0.6); background: rgba(0,0,0,0.05); border-radius: 6px; padding: 3px 6px; min-width: 46px; text-align: center; white-space: nowrap; }
+  .odds-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 4px; }
+  .odd-chip { height: 28px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); border-radius: 6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--chip-fg); }
 
-.tab{
-  height:50px;
-  border-radius:12px;
-  background:#064e3b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.tab.active{
-  background:white;
-  color:black;
-}
-
-/* FEATURE */
-.feature{
-  display:grid;
-  grid-template-columns:1fr 2fr 1fr;
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.box{
-  background:#064e3b;
-  padding:15px;
-  border-radius:15px;
-}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-}
-
-/* CARD */
-.league-card{
-  background:#ecfdf5;
-  color:black;
-  border-radius:15px;
-  padding:15px;
-}
-
-.league-header{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-}
-
-.live{
-  background:red;
-  color:white;
-  padding:2px 6px;
-  border-radius:6px;
-  font-size:10px;
-}
-
-.match{
-  display:grid;
-  grid-template-columns:1fr auto 1fr;
-  align-items:center;
-  margin:5px 0;
-}
-
-.score{
-  background:#d1fae5;
-  padding:3px 8px;
-  border-radius:6px;
-}
-
-.odds{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:4px;
-  margin-top:10px;
-}
-
-.odds div{
-  background:#d1fae5;
-  padding:5px;
-  border-radius:6px;
-  text-align:center;
-}
+  /* FOOTER */
+  .footer { text-align: right; font-size: 11px; color: var(--muted); padding-bottom: 4px; }
+  .footer strong { color: var(--text); font-weight: 700; }
 </style>
-</head>
 
-<body>
+<div class="app">
+  <h2 class="sr-only">Partidos.Hoy — football scores and live matches dashboard</h2>
 
-<div class="container">
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">⚽ Partidos.Hoy</div>
-    <div class="actions">
-      <div class="icon">🔍</div>
-      <div class="icon">📅</div>
-      <div class="icon">👤</div>
+  <header class="header">
+    <div class="logo">
+      Partid<span class="ball"></span>s<span class="dot">.Hoy</span>
     </div>
-  </div>
+    <div class="header-btns">
+      <button class="icon-btn" title="Search">🔍</button>
+      <button class="icon-btn" title="Calendar">📅</button>
+      <button class="icon-btn primary" title="Profile">👤</button>
+    </div>
+  </header>
 
-  <!-- TABS -->
   <div class="tabs">
-    <div class="tab active">AGENDA DEL DÍA</div>
-    <div class="tab">CHAT</div>
-    <div class="tab">PARTIDOS EN VIVO</div>
+    <button class="tab active" onclick="setTab(this)">AGENDA DEL DÍA</button>
+    <button class="tab" onclick="setTab(this)">💬 CHAT <span class="badge">0</span></button>
+    <button class="tab" onclick="setTab(this)">PARTIDOS EN VIVO <span class="live-badge">LIVE</span></button>
   </div>
 
-  <!-- FEATURE -->
-  <div class="feature">
-    <div class="box">
-      <div>FEATURED MATCH</div>
-      <h2>2 - 1</h2>
+  <section class="featured">
+    <div class="featured-inner">
+      <div class="match-info">
+        <p class="match-label">FEATURED MATCH</p>
+        <div class="teams">
+          <div class="team">
+            <div class="team-badge badge-a">A</div>
+            <span class="team-name">Team Alfa</span>
+          </div>
+          <div class="score-center">
+            <span class="live-badge">LIVE</span>
+            <span class="score">2 - 1</span>
+            <span class="vs-text">vs</span>
+          </div>
+          <div class="team">
+            <div class="team-badge badge-b">B</div>
+            <span class="team-name">Team Beta</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-area">
+        <div class="video-bg"></div>
+        <span class="video-live">LIVE</span>
+        <button class="play-btn"><div class="play-icon"></div></button>
+        <button class="video-watch">WATCH LIVE</button>
+        <div class="video-icons">🔊 ⛶</div>
+      </div>
+
+      <div class="chat-panel">
+        <p class="chat-label">LIVE CHAT</p>
+        <div class="chat-msgs">
+          <div class="chat-line"><div class="avatar">i</div><p class="chat-text"><strong>iTonfo:</strong><span>Messi goal!!</span></p></div>
+          <div class="chat-line"><div class="avatar">R</div><p class="chat-text"><strong>Replical:</strong><span>⚽🔥</span></p></div>
+          <div class="chat-line"><div class="avatar">F</div><p class="chat-text"><strong>ReplicaFan:</strong><span>Arsenal dominant today!</span></p></div>
+        </div>
+        <div class="chat-input">
+          <input placeholder="Type a hooligan..." />
+          <button class="send-btn">➤</button>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="box" style="background:black;text-align:center;">
-      ▶ VIDEO
-    </div>
+  <section class="leagues" id="leagues">
+    <!-- JS rendered -->
+  </section>
 
-    <div class="box">
-      <div>LIVE CHAT</div>
-      <p>Messi goal!!</p>
-      <p>Arsenal dominating</p>
-    </div>
-  </div>
-
-  <!-- LEAGUES -->
-  <div class="grid" id="leagues"></div>
-
+  <footer class="footer">Desarrollado por <strong>DevReplica</strong></footer>
 </div>
 
 <script>
 const leagues = [
-  {
-    name: "LIGA MX",
-    icon: "⚽",
-    matches: [
-      { home: "Liverpool", away: "Chelsea", homeIcon: "🔴", awayIcon: "🟡", score: "1 - 0" }
-    ]
-  },
-  {
-    name: "PREMIER LEAGUE",
-    icon: "🏆",
-    matches: [
-      { home: "River Plate", away: "Boca Juniors", homeIcon: "⚪", awayIcon: "🔵", time: "21:00", odds: ["+1.00","-","-1.00","-","+1.35"] }
-    ]
-  },
-  {
-    name: "LA LIGA",
-    icon: "🇪🇸",
-    matches: [
-      { home: "Real Madrid", away: "Barcelona", homeIcon: "⚪", awayIcon: "🔵", score: "2 - 1" }
-    ]
-  }
+  { name:"LIGA MX", icon:"⚽", matches:[
+    { home:"Liga MX", away:"Cionrobol", hi:"🟥", ai:"🔵", time:"21:00", odds:["+1.00","-","-1.00","-","+0.05"] },
+    { home:"Liverpool", away:"Chelsea", hi:"🔴", ai:"🟡", score:"1 - 0" }
+  ]},
+  { name:"PREMIER LEAGUE", icon:"🏆", matches:[
+    { home:"River Plate", away:"Boca Juniors", hi:"⚪", ai:"🔵", time:"21:00", odds:["+1.00","-","-1.00","-","+1.35"] },
+    { home:"Liverpool", away:"Arsenal", hi:"🔴", ai:"🔴", score:"2 - 1" }
+  ]},
+  { name:"LA LIGA", icon:"🇪🇸", matches:[
+    { home:"River Plate", away:"Boca dola", hi:"⚪", ai:"🟠", time:"21:00", odds:["+1.00","-","-1.00","-","+1.00"] },
+    { home:"Goraron", away:"Moantina", hi:"🟢", ai:"🟤", score:"2 - 0" }
+  ]},
+  { name:"PREMIER LEAGUE", icon:"🏆", matches:[
+    { home:"River Plate", away:"Boca Juniors", hi:"⚫", ai:"🟤", time:"21:00", odds:["+1.00","-1.50","-1.00","+2.00","+1.08"] },
+    { home:"Liverpool", away:"Arsenal", hi:"🔴", ai:"🔴", score:"2 - 1" }
+  ]},
+  { name:"LA LIGA", icon:"🇪🇸", matches:[
+    { home:"River Plate", away:"Boca dola", hi:"⚪", ai:"🟠", time:"21:00", odds:["+1.00","-2.50","-1.00","+0.65","+1.00"] },
+    { home:"Goraron", away:"Moantina", hi:"🟢", ai:"🟤", score:"2 - 0" }
+  ]},
+  { name:"LA LIGA", icon:"🇪🇸", matches:[
+    { home:"River Plate", away:"Boca dola", hi:"⚪", ai:"🟠", time:"21:00", odds:["+1.00","-","-1.00","-","+1.00"] },
+    { home:"Racing", away:"Independiente", hi:"🔵", ai:"🔴", score:"2 - 0" }
+  ]}
 ];
 
-const container = document.getElementById("leagues");
-
-leagues.forEach(l => {
-  const odds = l.matches[0]?.odds || ["+1.00","-","-1.00","-","+1.00"];
-
-  const card = document.createElement("div");
-  card.className = "league-card";
-
-  let html = `
-    <div class="league-header">
-      <div><b>${l.icon} ${l.name}</b></div>
-      <div class="live">LIVE</div>
-    </div>
-  `;
-
-  l.matches.forEach(m => {
-    html += `
-      <div class="match">
-        <div>${m.home} ${m.homeIcon}</div>
-        <div class="score">${m.score || m.time}</div>
-        <div>${m.awayIcon} ${m.away}</div>
+function renderLeagues() {
+  const el = document.getElementById('leagues');
+  el.innerHTML = leagues.map(l => {
+    const odds = l.matches[0]?.odds || ['+1.00','-','-1.00','-','+1.00'];
+    return `<article class="league-card">
+      <div class="lc-header">
+        <div class="lc-title"><span class="lc-icon">${l.icon}</span><span class="lc-name">${l.name}</span></div>
+        <span class="lc-live">● LIVE</span>
       </div>
-    `;
-  });
+      ${l.matches.map(m => `
+        <div class="match-row">
+          <div class="home-team"><span>${m.home}</span><span class="team-icon">${m.hi}</span></div>
+          <span class="match-score">${m.score || m.time}</span>
+          <div class="away-team"><span class="team-icon">${m.ai}</span><span>${m.away}</span></div>
+        </div>`).join('')}
+      <div class="odds-row">${odds.map(o => `<div class="odd-chip">${o}</div>`).join('')}</div>
+    </article>`;
+  }).join('');
+}
 
-  html += `<div class="odds">`;
+function setTab(btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
 
-  odds.forEach(o => {
-    html += `<div>${o}</div>`;
-  });
-
-  html += `</div>`;
-
-  card.innerHTML = html;
-  container.appendChild(card);
-});
+renderLeagues();
 </script>
-
-</body>
-</html>
