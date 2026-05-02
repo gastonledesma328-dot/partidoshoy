@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reproductor</title>
+</head>
+
+<body style="margin:0; background:black;">
+
+<video id="video" controls autoplay style="width:100%; height:100%;"></video>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const videoSrc = urlParams.get('url');
+
+const video = document.getElementById('video');
+
+if (Hls.isSupported()) {
+  const hls = new Hls();
+  hls.loadSource(videoSrc);
+  hls.attachMedia(video);
+} else {
+  video.src = videoSrc;
+}
+</script>
+
+</body>
+</html>
