@@ -4,10 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Partidos Hoy</title>
-  <link rel="stylesheet" href="./assets/styles-DPHAwQ2E.css">
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b0f1a;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: #0f172a;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background: #334155;
+    }
+  </style>
 </head>
+
 <body>
-  <div id="root"></div>
-  <script type="module" src="./assets/index-COALA_Gu.js"></script>
+
+<header>⚽ Partidos Hoy</header>
+
+<div class="container" id="app"></div>
+
+<script>
+const partidos = [
+  {
+    liga: "Premier League",
+    equipos: "Arsenal vs Chelsea",
+    hora: "16:00",
+    stream: "https://test-stream.m3u8"
+  },
+  {
+    liga: "La Liga",
+    equipos: "Real Madrid vs Barça",
+    hora: "18:00",
+    stream: "https://test-stream.m3u8"
+  }
+];
+
+const app = document.getElementById("app");
+
+partidos.forEach(p => {
+  const div = document.createElement("div");
+  div.className = "card";
+
+  div.innerHTML = `
+    <b>${p.equipos}</b><br>
+    ${p.liga} - ${p.hora}
+  `;
+
+  div.onclick = () => {
+    window.location.href = `player.html?url=${encodeURIComponent(p.stream)}`;
+  };
+
+  app.appendChild(div);
+});
+</script>
+
 </body>
 </html>
