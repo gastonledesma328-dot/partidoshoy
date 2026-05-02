@@ -8,6 +8,7 @@
 <style>
 :root {
   --bg: #020617;
+  --surface: #020617;
   --card: #0f172a;
   --border: #1e293b;
   --text: #e2e8f0;
@@ -17,7 +18,7 @@
 
 body {
   margin: 0;
-  font-family: Inter, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -26,15 +27,31 @@ body {
 .header {
   display: flex;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--border);
 }
 
 .logo {
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 18px;
 }
 
-/* HERO MATCH */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* HERO */
 .hero {
   margin: 20px;
   padding: 20px;
@@ -43,9 +60,14 @@ body {
   border: 1px solid var(--border);
 }
 
-.hero h2 {
-  margin: 0;
+.hero .league {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hero .teams {
   font-size: 18px;
+  margin: 6px 0;
 }
 
 .hero .time {
@@ -64,7 +86,7 @@ body {
   border-radius: 999px;
   background: var(--card);
   color: var(--muted);
-  cursor: pointer;
+  font-size: 13px;
 }
 
 .tab.active {
@@ -78,73 +100,131 @@ body {
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 10px;
+  color: var(--muted);
 }
 
 /* CARD */
 .card {
   display: flex;
   justify-content: space-between;
-  padding: 14px;
-  border-radius: 12px;
+  align-items: center;
   background: var(--card);
   border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
   margin-bottom: 10px;
   transition: 0.2s;
 }
 
 .card:hover {
   border-color: var(--accent);
+  transform: scale(1.01);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
 }
 
 .match {
   font-size: 14px;
 }
 
+.league {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.right {
+  text-align: right;
+}
+
 .time {
+  font-size: 13px;
   color: var(--accent);
 }
+
+.live {
+  font-size: 11px;
+  color: red;
+}
 </style>
+
 </head>
 
 <body>
 
 <div class="header">
   <div class="logo">⚽ Partidos.Hoy</div>
-  <div>🔍 📅 👤</div>
+  <div class="actions">
+    <div class="icon">🔍</div>
+    <div class="icon">📅</div>
+    <div class="icon">👤</div>
+  </div>
 </div>
 
-<!-- HERO -->
 <div class="hero">
-  <h2>Real Madrid vs Barcelona</h2>
+  <div class="league">La Liga</div>
+  <div class="teams">Real Madrid vs Barcelona</div>
   <div class="time">18:30</div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <div class="tab active">Hoy</div>
   <div class="tab">Mañana</div>
+  <div class="tab">En Vivo</div>
 </div>
 
-<!-- SECCION -->
-<div class="section">
-  <div class="section-title">La Liga</div>
-
-  <div class="card">
-    <div class="match">Real Madrid vs Barcelona</div>
-    <div class="time">18:30</div>
-  </div>
-
-  <div class="card">
-    <div class="match">Atlético vs Sevilla</div>
-    <div class="time">21:00</div>
-  </div>
-
-</div>
+<div id="app"></div>
 
 <script>
-// después conectamos JSON real
+const data = [
+  {
+    liga: "Premier League",
+    partidos: [
+      { equipos: "Arsenal vs Chelsea", hora: "16:00", live: true },
+      { equipos: "Liverpool vs City", hora: "19:00", live: false }
+    ]
+  },
+  {
+    liga: "La Liga",
+    partidos: [
+      { equipos: "Real Madrid vs Barça", hora: "18:30", live: true },
+      { equipos: "Sevilla vs Valencia", hora: "21:00", live: false }
+    ]
+  }
+];
+
+const app = document.getElementById("app");
+
+data.forEach(liga => {
+  const section = document.createElement("div");
+  section.className = "section";
+
+  section.innerHTML = `<div class="section-title">${liga.liga}</div>`;
+
+  liga.partidos.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="left">
+        <div class="match">${p.equipos}</div>
+        <div class="league">${liga.liga}</div>
+      </div>
+      <div class="right">
+        <div class="time">${p.hora}</div>
+        ${p.live ? '<div class="live">EN VIVO</div>' : ''}
+      </div>
+    `;
+
+    section.appendChild(card);
+  });
+
+  app.appendChild(section);
+});
 </script>
 
 </body>
