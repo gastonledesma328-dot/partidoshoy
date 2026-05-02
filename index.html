@@ -2,260 +2,124 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partidos Hoy</title>
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <style>
-/* === TU MISMO DISEÑO BASE (ligeramente optimizado) === */
-body {
-  margin:0;
-  font-family: Arial;
-  background:#162d24;
-  color:#fff;
+:root {
+  --bg: #1e3a2f;
+  --bg2: #162d24;
+  --card: #1a3228;
+  --border: rgba(255,255,255,0.1);
+  --primary: #5fcf80;
+  --live: #e8533a;
+  --text: #f0faf4;
+  --muted: rgba(240,250,244,0.55);
+  --chip-bg: #f2f7f3;
+  --chip-fg: #182e22;
 }
-
-.app {
-  max-width:900px;
-  margin:auto;
-  padding:15px;
-}
-
-/* HEADER */
-.header {
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-}
-
-.tabs {
-  display:flex;
-  gap:10px;
-  margin:10px 0;
-}
-
-.tab {
-  flex:1;
-  padding:10px;
-  cursor:pointer;
-  background:#1e3a2f;
-  border:none;
-  color:white;
-}
-
-.tab.active {
-  background:#5fcf80;
-  color:#000;
-}
-
-/* SECCIONES */
-.section {
-  display:none;
-}
-
-.section.active {
-  display:block;
-}
-
-/* MATCH */
-.match {
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  background:#1a3228;
-  margin-bottom:8px;
-  cursor:pointer;
-  border-radius:8px;
-}
-
-.match:hover {
-  transform:scale(1.02);
-}
-
-/* VIDEO */
-#videoContainer {
-  display:none;
-  margin-top:15px;
-}
-
-video {
-  width:100%;
-  background:black;
-}
-
-/* CHAT */
-.chat-box {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.chat-messages {
-  height:200px;
-  overflow:auto;
-  background:#1a3228;
-  padding:10px;
-}
-
-.chat-input {
-  display:flex;
-}
-
-.chat-input input {
-  flex:1;
-  padding:8px;
-}
-
-.chat-input button {
-  padding:8px;
-}
+body { margin:0; font-family:sans-serif; background:linear-gradient(160deg,#1e3a2f,#162d24); color:var(--text);} 
+.app { max-width:900px; margin:auto; padding:16px; }
+.header { display:flex; justify-content:space-between; margin-bottom:10px; }
+.tabs { display:flex; gap:6px; margin-bottom:10px; }
+.tab { flex:1; padding:10px; cursor:pointer; border:none; background:#24463a; color:#fff; }
+.tab.active { background:#fff; color:#000; }
+.section { display:none; }
+.section.active { display:block; }
+.league-card { background:var(--chip-bg); color:#000; padding:10px; margin-bottom:10px; border-radius:10px; }
+.match-row { display:flex; justify-content:space-between; padding:6px; cursor:pointer; }
+.match-row:hover { background:#ddd; }
+.video-area { background:#000; height:200px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
 </style>
 </head>
-
 <body>
-
 <div class="app">
-
-  <div class="header">
-    <h2>⚽ Partidos.Hoy</h2>
-  </div>
+  <div class="header"><h2>Partidos.Hoy</h2></div>
 
   <div class="tabs">
-    <button class="tab active" onclick="setTab('agenda', this)">Agenda</button>
-    <button class="tab" onclick="setTab('live', this)">En Vivo</button>
-    <button class="tab" onclick="setTab('chat', this)">Chat</button>
+    <button class="tab active" onclick="switchTab('agenda',this)">Agenda</button>
+    <button class="tab" onclick="switchTab('live',this)">En Vivo</button>
+    <button class="tab" onclick="switchTab('chat',this)">Chat</button>
   </div>
 
-  <!-- AGENDA -->
   <div id="agenda" class="section active"></div>
 
-  <!-- LIVE -->
   <div id="live" class="section">
-    <div id="videoContainer">
-      <video id="player" controls autoplay></video>
+    <div class="video-area">
+      <video id="video" controls autoplay style="width:100%;height:100%"></video>
     </div>
   </div>
 
-  <!-- CHAT -->
   <div id="chat" class="section">
-    <div class="chat-box">
-      <div id="chatMessages" class="chat-messages"></div>
-      <div class="chat-input">
-        <input id="chatInput" placeholder="Escribí algo...">
-        <button onclick="sendMessage()">Enviar</button>
-      </div>
-    </div>
+    <div id="chatBox"></div>
+    <input id="chatInput" placeholder="Escribe..."/>
+    <button onclick="sendMessage()">Enviar</button>
   </div>
-
 </div>
 
 <script>
+const DATA = [
+  {
+    name:"Premier League",
+    matches:[
+      {home:"Liverpool", away:"Arsenal", time:"21:00", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
+      {home:"Chelsea", away:"City", time:"19:00", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}
+    ]
+  }
+];
 
-/* =========================
-   DATA (SIMULA TU API)
-========================= */
-
-async function loadMatches() {
-  // 🔥 después reemplazás esto por tu JSON real
-  return [
-    {
-      league: "Argentina",
-      matches: [
-        { home:"River", away:"Boca", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-        { home:"Racing", away:"Independiente", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-      ]
-    },
-    {
-      league: "Europa",
-      matches: [
-        { home:"Barcelona", away:"Real Madrid", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-      ]
-    }
-  ];
+function renderAgenda(){
+  const el=document.getElementById('agenda');
+  el.innerHTML='';
+  DATA.forEach(l=>{
+    const card=document.createElement('div');
+    card.className='league-card';
+    card.innerHTML=`<b>${l.name}</b>`;
+    l.matches.forEach(m=>{
+      const row=document.createElement('div');
+      row.className='match-row';
+      row.innerHTML=`${m.home} vs ${m.away} - ${m.time}`;
+      row.onclick=()=>playMatch(m.url);
+      card.appendChild(row);
+    });
+    el.appendChild(card);
+  });
 }
 
-/* =========================
-   RENDER
-========================= */
-
-async function renderAgenda() {
-  const data = await loadMatches();
-  const container = document.getElementById("agenda");
-
-  container.innerHTML = data.map(l => `
-    <h3>${l.league}</h3>
-    ${l.matches.map(m => `
-      <div class="match" onclick="playMatch('${m.url}')">
-        <span>${m.home}</span>
-        <strong>vs</strong>
-        <span>${m.away}</span>
-      </div>
-    `).join("")}
-  `).join("");
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-/* =========================
-   PLAYER
-========================= */
+function playMatch(url){
+  switchTab('live', document.querySelectorAll('.tab')[1]);
+  const video=document.getElementById('video');
 
-function playMatch(url) {
-  setTab('live', document.querySelectorAll('.tab')[1]);
-
-  const video = document.getElementById("player");
-  const container = document.getElementById("videoContainer");
-
-  container.style.display = "block";
-
-  if (Hls.isSupported()) {
-    const hls = new Hls();
+  if(Hls.isSupported()){
+    const hls=new Hls();
     hls.loadSource(url);
     hls.attachMedia(video);
   } else {
-    video.src = url;
+    video.src=url;
   }
 }
 
-/* =========================
-   TABS
-========================= */
-
-function setTab(tabName, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove("active"));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove("active"));
-
-  document.getElementById(tabName).classList.add("active");
-  btn.classList.add("active");
-}
-
-/* =========================
-   CHAT SIMPLE
-========================= */
-
-let messages = [];
-
-function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const text = input.value;
-
-  if (!text) return;
-
-  messages.push(text);
-  input.value = "";
+let messages=[];
+function sendMessage(){
+  const input=document.getElementById('chatInput');
+  messages.push(input.value);
+  input.value='';
   renderChat();
 }
 
-function renderChat() {
-  const box = document.getElementById("chatMessages");
-  box.innerHTML = messages.map(m => `<div>${m}</div>`).join("");
+function renderChat(){
+  const box=document.getElementById('chatBox');
+  box.innerHTML=messages.map(m=>`<div>${m}</div>`).join('');
 }
 
-/* =========================
-   INIT
-========================= */
-
 renderAgenda();
-
 </script>
-
 </body>
 </html>
