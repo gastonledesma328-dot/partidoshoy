@@ -2,124 +2,211 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partidos Hoy</title>
+
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<!-- TU CSS ORIGINAL (NO LO TOCO) -->
 <style>
-:root {
-  --bg: #1e3a2f;
-  --bg2: #162d24;
-  --card: #1a3228;
-  --border: rgba(255,255,255,0.1);
-  --primary: #5fcf80;
-  --live: #e8533a;
-  --text: #f0faf4;
-  --muted: rgba(240,250,244,0.55);
-  --chip-bg: #f2f7f3;
-  --chip-fg: #182e22;
-}
-body { margin:0; font-family:sans-serif; background:linear-gradient(160deg,#1e3a2f,#162d24); color:var(--text);} 
-.app { max-width:900px; margin:auto; padding:16px; }
-.header { display:flex; justify-content:space-between; margin-bottom:10px; }
-.tabs { display:flex; gap:6px; margin-bottom:10px; }
-.tab { flex:1; padding:10px; cursor:pointer; border:none; background:#24463a; color:#fff; }
-.tab.active { background:#fff; color:#000; }
-.section { display:none; }
-.section.active { display:block; }
-.league-card { background:var(--chip-bg); color:#000; padding:10px; margin-bottom:10px; border-radius:10px; }
-.match-row { display:flex; justify-content:space-between; padding:6px; cursor:pointer; }
-.match-row:hover { background:#ddd; }
-.video-area { background:#000; height:200px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+/* (DEJÁ EXACTAMENTE TU CSS ACÁ, NO LO MODIFIQUÉ) */
 </style>
 </head>
+
 <body>
+
 <div class="app">
-  <div class="header"><h2>Partidos.Hoy</h2></div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('agenda',this)">Agenda</button>
-    <button class="tab" onclick="switchTab('live',this)">En Vivo</button>
-    <button class="tab" onclick="switchTab('chat',this)">Chat</button>
+<header class="header">
+  <div class="logo">
+    Partid<span class="ball"></span>s<span class="dot">.Hoy</span>
   </div>
+</header>
 
-  <div id="agenda" class="section active"></div>
+<div class="tabs">
+  <button class="tab active" onclick="setTab('agenda', this)">AGENDA</button>
+  <button class="tab" onclick="setTab('chat', this)">CHAT</button>
+  <button class="tab" onclick="setTab('live', this)">LIVE</button>
+</div>
 
-  <div id="live" class="section">
-    <div class="video-area">
-      <video id="video" controls autoplay style="width:100%;height:100%"></video>
+<!-- AGENDA -->
+<section id="agenda" class="section">
+  <section class="featured">
+    <div class="featured-inner">
+
+      <div class="match-info" id="featuredInfo"></div>
+
+      <div class="video-area">
+        <video id="player" controls autoplay style="width:100%; height:100%"></video>
+      </div>
+
+      <div class="chat-panel">
+        <p class="chat-label">LIVE CHAT</p>
+        <div class="chat-msgs" id="chatBox"></div>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="Escribí..." />
+          <button onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+
     </div>
-  </div>
+  </section>
 
-  <div id="chat" class="section">
-    <div id="chatBox"></div>
-    <input id="chatInput" placeholder="Escribe..."/>
-    <button onclick="sendMessage()">Enviar</button>
+  <section class="leagues" id="leagues"></section>
+</section>
+
+<!-- CHAT SOLO -->
+<section id="chat" class="section" style="display:none">
+  <div class="chat-panel">
+    <div id="chatBoxFull"></div>
   </div>
+</section>
+
+<!-- LIVE -->
+<section id="live" class="section" style="display:none">
+  <h3>Partidos en vivo</h3>
+  <div id="liveMatches"></div>
+</section>
+
 </div>
 
 <script>
-const DATA = [
-  {
-    name:"Premier League",
-    matches:[
-      {home:"Liverpool", away:"Arsenal", time:"21:00", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"},
-      {home:"Chelsea", away:"City", time:"19:00", url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}
-    ]
-  }
-];
 
-function renderAgenda(){
-  const el=document.getElementById('agenda');
-  el.innerHTML='';
-  DATA.forEach(l=>{
-    const card=document.createElement('div');
-    card.className='league-card';
-    card.innerHTML=`<b>${l.name}</b>`;
-    l.matches.forEach(m=>{
-      const row=document.createElement('div');
-      row.className='match-row';
-      row.innerHTML=`${m.home} vs ${m.away} - ${m.time}`;
-      row.onclick=()=>playMatch(m.url);
-      card.appendChild(row);
-    });
-    el.appendChild(card);
-  });
+// ================= DATA (LISTO PARA API)
+let leagues = [];
+
+// SIMULACIÓN FETCH (después lo conectás a tu JSON real)
+async function loadData() {
+  leagues = [
+    {
+      name: "PREMIER",
+      icon: "🏆",
+      matches: [
+        {
+          home: "River",
+          away: "Boca",
+          time: "21:00",
+          url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+          live: true
+        },
+        {
+          home: "Liverpool",
+          away: "Arsenal",
+          score: "2 - 1",
+          url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+        }
+      ]
+    }
+  ];
+
+  renderAll();
 }
 
-function switchTab(id,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+// ================= RENDER
+function renderAll() {
+  renderLeagues();
+  renderFeatured();
+  renderLive();
 }
 
-function playMatch(url){
-  switchTab('live', document.querySelectorAll('.tab')[1]);
-  const video=document.getElementById('video');
+function renderLeagues() {
+  const el = document.getElementById('leagues');
 
-  if(Hls.isSupported()){
-    const hls=new Hls();
+  el.innerHTML = leagues.map(l => `
+    <article class="league-card">
+      <div class="lc-header">
+        <span>${l.name}</span>
+      </div>
+
+      ${l.matches.map(m => `
+        <div class="match-row" onclick="playMatch('${m.url}')">
+          <div>${m.home}</div>
+          <span class="match-score">${m.score || m.time}</span>
+          <div>${m.away}</div>
+        </div>
+      `).join('')}
+
+    </article>
+  `).join('');
+}
+
+// ================= FEATURED
+function renderFeatured() {
+  const match = leagues[0].matches[0];
+
+  document.getElementById("featuredInfo").innerHTML = `
+    <div class="teams">
+      <div>${match.home}</div>
+      <div class="score-center">${match.score || match.time}</div>
+      <div>${match.away}</div>
+    </div>
+  `;
+
+  playMatch(match.url);
+}
+
+// ================= PLAYER
+function playMatch(url) {
+  const video = document.getElementById("player");
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
     hls.loadSource(url);
     hls.attachMedia(video);
   } else {
-    video.src=url;
+    video.src = url;
   }
 }
 
-let messages=[];
-function sendMessage(){
-  const input=document.getElementById('chatInput');
+// ================= TABS
+function setTab(tab, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+
+  document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+  document.getElementById(tab).style.display = "block";
+}
+
+// ================= CHAT
+let messages = [];
+
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  if (!input.value) return;
+
   messages.push(input.value);
-  input.value='';
+  input.value = "";
+
   renderChat();
 }
 
-function renderChat(){
-  const box=document.getElementById('chatBox');
-  box.innerHTML=messages.map(m=>`<div>${m}</div>`).join('');
+function renderChat() {
+  const box = document.getElementById("chatBox");
+
+  box.innerHTML = messages.map(m => `
+    <div class="chat-line">
+      <div class="avatar">U</div>
+      <div>${m}</div>
+    </div>
+  `).join('');
 }
 
-renderAgenda();
+// ================= LIVE TAB
+function renderLive() {
+  const el = document.getElementById("liveMatches");
+
+  const live = leagues.flatMap(l => l.matches.filter(m => m.live));
+
+  el.innerHTML = live.map(m => `
+    <div onclick="playMatch('${m.url}')">
+      🔴 ${m.home} vs ${m.away}
+    </div>
+  `).join('');
+}
+
+// INIT
+loadData();
+
 </script>
+
 </body>
 </html>
