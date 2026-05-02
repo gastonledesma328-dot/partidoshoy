@@ -1,46 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Partidos Hoy</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partidos Hoy</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #0b0f1a;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0b1120;
+  color: white;
+}
 
-    header {
-      background: #0f172a;
-      padding: 15px;
-      font-size: 20px;
-      font-weight: bold;
-    }
+/* HEADER */
+.header {
+  background: #0f172a;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+}
 
-    .container {
-      padding: 20px;
-    }
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #22c55e;
+}
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+/* GRID */
+.container {
+  padding: 20px;
+  display: grid;
+  gap: 15px;
+}
 
-    .card:hover {
-      background: #334155;
-    }
-  </style>
+/* CARD */
+.card {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border-radius: 12px;
+  padding: 15px;
+  transition: 0.2s;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  border-color: #22c55e;
+}
+
+/* TEXT */
+.liga {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.match {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.time {
+  font-size: 13px;
+  color: #22c55e;
+}
+</style>
+
 </head>
 
 <body>
 
-<header>⚽ Partidos Hoy</header>
+<div class="header">
+  <div class="logo">⚽ Partidos Hoy</div>
+</div>
 
 <div class="container" id="app"></div>
 
@@ -63,19 +97,20 @@ const partidos = [
 const app = document.getElementById("app");
 
 partidos.forEach(p => {
-  const div = document.createElement("div");
-  div.className = "card";
+  const card = document.createElement("div");
+  card.className = "card";
 
-  div.innerHTML = `
-    <b>${p.equipos}</b><br>
-    ${p.liga} - ${p.hora}
+  card.innerHTML = `
+    <div class="liga">${p.liga}</div>
+    <div class="match">${p.equipos}</div>
+    <div class="time">${p.hora}</div>
   `;
 
-  div.onclick = () => {
-    window.location.href = `player.html?url=${encodeURIComponent(p.stream)}`;
+  card.onclick = () => {
+    window.location.href = "player.html?url=" + encodeURIComponent(p.stream);
   };
 
-  app.appendChild(div);
+  app.appendChild(card);
 });
 </script>
 
